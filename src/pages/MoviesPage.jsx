@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { AgGridReact } from 'ag-grid-react';
 import { Link } from 'react-router-dom';
 import { fetchMovies } from '../services/api';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 const MoviesPage = () => {
   const [title, setTitle] = useState('');
@@ -14,29 +11,6 @@ const MoviesPage = () => {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  
-  const columnDefs = [
-    { 
-      headerName: 'Title', 
-      field: 'title', 
-      sortable: true, 
-      filter: true,
-      cellRenderer: (params) => {
-        return <Link to={`/movie/${params.data.imdbID}`}>{params.value}</Link>;
-      }
-    },
-    { headerName: 'Year', field: 'year', sortable: true, filter: true, width: 100 },
-    { headerName: 'IMDB Rating', field: 'imdbRating', sortable: true, filter: true, width: 140 },
-    { headerName: 'Rotten Tomatoes', field: 'rottenTomatoesRating', sortable: true, filter: true, width: 180 },
-    { headerName: 'Metacritic', field: 'metacriticRating', sortable: true, filter: true, width: 140 },
-    { headerName: 'Classification', field: 'classification', sortable: true, filter: true, width: 140 }
-  ];
-  
-  const defaultColDef = {
-    flex: 1,
-    minWidth: 100,
-    resizable: true
-  };
   
   const loadMovies = useCallback(async (page = 1) => {
     setLoading(true);
@@ -151,14 +125,20 @@ const MoviesPage = () => {
       
       {!loading && movies.length > 0 && (
         <>
-          <div className="ag-theme-alpine" style={{ height: 600, width: '100%' }}>
-            <AgGridReact
-              columnDefs={columnDefs}
-              rowData={movies}
-              defaultColDef={defaultColDef}
-              pagination={false}
-              domLayout="autoHeight"
-            />
+          <div className="movie-list">
+            {movies.map((movie) => (
+              <div key={movie.imdbID} className="movie-card mb-3 p-3 border rounded bg-white shadow-sm">
+                <h4>
+                  <Link to={`/movie/${movie.imdbID}`}>{movie.title}</Link> <span className="text-muted">({movie.year})</span>
+                </h4>
+                <div className="d-flex flex-wrap gap-3 align-items-center">
+                  <span><strong>IMDB:</strong> {movie.imdbRating ?? 'N/A'}</span>
+                  <span><strong>Rotten Tomatoes:</strong> {movie.rottenTomatoesRating ?? 'N/A'}</span>
+                  <span><strong>Metacritic:</strong> {movie.metacriticRating ?? 'N/A'}</span>
+                  <span><strong>Classification:</strong> {movie.classification ?? 'N/A'}</span>
+                </div>
+              </div>
+            ))}
           </div>
           
           {pagination && (
